@@ -9,9 +9,6 @@ int CALLBACK WinMain(
 
 	try
 	{
-
-
-
 		Window wnd(800, 300, L"Direct3D Tutorial");
 
 		// message pump (aka message loop)
@@ -22,6 +19,11 @@ int CALLBACK WinMain(
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
+
+			if (wnd.kbd.KeyIsPressed(VK_SPACE))
+			{
+				MessageBoxA(nullptr, "Something Happened!", "Space Key was pressed.", MB_OK | MB_ICONEXCLAMATION);
+			}
 		}
 
 		if (gResult == -1)
