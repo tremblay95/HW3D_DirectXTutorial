@@ -1,15 +1,29 @@
 #pragma once
-#include "WINclude.h"
+#include "D3DWin.h"
+#include "D3DTutException.h"
 
 
 class Window 
 {
+public:
+	class Exception : public D3DTutException
+	{
+	public:
+		Exception(int line, const char* file, HRESULT hr) noexcept;
+		const char* what() const noexcept override;
+		const char* GetType() const noexcept override; // Todo: Override?
+		static std::string TranslateErrorCode(HRESULT hr) noexcept;
+		HRESULT GetErrorCode() const noexcept;
+		std::string GetErrorString() const noexcept;
+	private:
+		HRESULT hr;
+	};
 private:
 	// singleton manages registration/cleanup of window class
 	class WindowClass
 	{
 	public:
-		static const wchar_t *GetName() noexcept;
+		static const WCHAR* GetName() noexcept;
 		static HINSTANCE GetInstance() noexcept;
 	private:
 		WindowClass() noexcept;
@@ -19,12 +33,12 @@ private:
 		WindowClass(const WindowClass &) = delete;
 		WindowClass &operator=(const WindowClass &) = delete;
 
-		static constexpr const wchar_t *wndClassName = L"D3D_Tutorial_Window";
+		static constexpr const WCHAR *wndClassName = L"D3D_Tutorial_Window";
 		static WindowClass wndClass;
 		HINSTANCE hInst;
 	};
 public:
-	Window(int width, int height, const wchar_t *name) noexcept;
+	Window(int width, int height, const WCHAR *name);
 	~Window();
 	Window(const Window &) = delete;
 	Window &operator=(const Window &) = delete;
@@ -37,3 +51,7 @@ private:
 	int height;
 	HWND hWnd;
 };
+
+// Error exception helper macro
+#define D3DWND_EXCEPT(hr) Window::Exception(__LINE__, __FILE__, hr)
+#define D3DWND_LAST_EXCEPT() Window::Exception(__LINE__, __FILE__, GetLastError())

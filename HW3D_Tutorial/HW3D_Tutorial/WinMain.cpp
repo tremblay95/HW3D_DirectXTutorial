@@ -7,24 +7,43 @@ int CALLBACK WinMain(
 	int			nCmdShow)
 {
 
-	Window wnd(800, 300, L"Direct3D Tutorial");
-
-	// message pump (aka message loop)
-	MSG msg;
-	BOOL gResult;
-
-	while ((gResult = GetMessage(&msg, nullptr, 0, 0)) > 0)
+	try
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
 
-	if (gResult == -1)
-	{
-		return -1;
+
+
+		Window wnd(800, 300, L"Direct3D Tutorial");
+
+		// message pump (aka message loop)
+		MSG msg;
+		BOOL gResult;
+
+		while ((gResult = GetMessage(&msg, nullptr, 0, 0)) > 0)
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		if (gResult == -1)
+		{
+			return -1;
+		}
+		else
+		{
+			return msg.wParam;
+		}
 	}
-	else
+	catch (const D3DTutException& e)
 	{
-		return msg.wParam;
+		MessageBoxA(nullptr, e.what(), e.GetType(), MB_OK | MB_ICONEXCLAMATION);
 	}
+	catch (const std::exception& e)
+	{
+		MessageBoxA(nullptr, e.what(), "Standard Exception", MB_OK | MB_ICONEXCLAMATION);
+	}
+	catch (...)
+	{
+		MessageBoxA(nullptr, "No details available", "Unknown Exception", MB_OK | MB_ICONEXCLAMATION);
+	}
+	return -1;
 }
