@@ -1,4 +1,5 @@
 #include "Window.h"
+#include <sstream>
 
 int CALLBACK WinMain(
 	HINSTANCE	hInstance,
@@ -19,11 +20,6 @@ int CALLBACK WinMain(
 		{
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
-
-			if (wnd.kbd.KeyIsPressed(VK_MENU))
-			{
-				MessageBoxA(nullptr, "Something Happened!", "Alt Key was pressed", MB_OK | MB_ICONEXCLAMATION);
-			}
 		}
 
 		if (gResult == -1)
