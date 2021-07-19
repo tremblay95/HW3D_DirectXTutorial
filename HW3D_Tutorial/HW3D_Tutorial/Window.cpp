@@ -120,11 +120,22 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 		PostQuitMessage(0);
 		return 0;
 
+		// Clear keyState when Window loses focus to prevent input getting stuck
+	case WM_KILLFOCUS:
+		kbd.ClearState();
+		break;
+
 		// Keyboard Messages
 	case WM_KEYDOWN:
-		kbd.OnKeyPressed(static_cast<unsigned char>(wParam));
+		// Syskey  messages need to be handled to track alt key & other system keys
+	case WM_SYSKEYDOWN:
+		if (!(lParam & 0x40000000) || kbd.AutorepeatIsEnabled())
+		{
+			kbd.OnKeyPressed(static_cast<unsigned char>(wParam));
+		}
 		break;
 	case WM_KEYUP:
+	case WM_SYSKEYUP:
 		kbd.OnKeyReleased(static_cast<unsigned char>(wParam));
 		break;
 	case WM_CHAR:
