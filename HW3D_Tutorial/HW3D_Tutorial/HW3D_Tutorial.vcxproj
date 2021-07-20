@@ -159,6 +159,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="App.cpp" />
+    <ClCompile Include="D3DTimer.cpp" />
     <ClCompile Include="D3DTutException.cpp" />
     <ClCompile Include="Keyboard.cpp" />
     <ClCompile Include="Mouse.cpp" />
@@ -167,6 +169,8 @@
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="App.h" />
+    <ClInclude Include="D3DTimer.h" />
     <ClInclude Include="D3DTutException.h" />
     <ClInclude Include="D3DWin.h" />
     <ClInclude Include="Keyboard.h" />
