@@ -73,8 +73,11 @@ Window::Window(int width, int height, const WCHAR* name)
 		throw D3DWND_LAST_EXCEPT();
 	}
 
-	// Show window
+	// Newly created windows start off as hidden
 	ShowWindow(hWnd, SW_SHOWDEFAULT);
+
+	// Create graphics object
+	pGfx = std::make_unique<Graphics>(hWnd);
 }
 
 Window::~Window()
@@ -95,18 +98,28 @@ std::optional<int> Window::ProcessMessages()
 	// message pump (aka message loop)
 	MSG msg;
 
+	// while queue has messages, remove and dispatch them (but do not block on empty queue)
 	while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 	{
+		// check for quit because peekmessage does not signal this via return val
 		if (msg.message == WM_QUIT)
 		{
-			return msg.wParam;
+			// return optional wrapping int (arg to PostQuitMessage is in wparam) signals quit
+			return (int)msg.wParam;
 		}
 
+		// TranslateMessage will post auxilliary WM_CHAR messages from key msgs
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
 
+	// return empty optional when not quitting app
 	return {};
+}
+
+Graphics& Window::Gfx()
+{
+	return *pGfx;
 }
 
 LRESULT CALLBACK Window::HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept
@@ -211,6 +224,13 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 	{
 		const POINTS pt = MAKEPOINTS(lParam);
 		mouse.OnLeftReleased(pt.x, pt.y);
+		
+		if (pt.x < 0 || pt.x >= width || pt.y < 0 || pt.y >= height)
+		{
+			ReleaseCapture();
+			mouse.OnMouseLeave();
+		}
+
 		break;
 	}
 	case WM_RBUTTONDOWN:
@@ -223,6 +243,13 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 	{
 		const POINTS pt = MAKEPOINTS(lParam);
 		mouse.OnRightReleased(pt.x, pt.y);
+
+		if (pt.x < 0 || pt.x >= width || pt.y < 0 || pt.y >= height)
+		{
+			ReleaseCapture();
+			mouse.OnMouseLeave();
+		}
+
 		break;
 	}
 	case WM_MOUSEWHEEL:
@@ -239,28 +266,6 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 }
 
 // Window Exception Stuff
-Window::Exception::Exception(int line, const char* file, HRESULT hr) noexcept
-	: D3DTutException(line, file), hr(hr)
-{
-}
-
-const char* Window::Exception::what() const noexcept
-{
-	std::ostringstream oss;
-	oss << GetType() << std::endl
-		<< "[Error Code] " << GetErrorCode() << std::endl
-		<< "[Description] " << GetErrorString() << std::endl
-		<< GetOriginString();
-
-	whatBuffer = oss.str();
-	
-	return whatBuffer.c_str();
-}
-
-const char* Window::Exception::GetType() const noexcept
-{
-	return "D3D Tutorial Window Exception";
-}
 
 std::string Window::Exception::TranslateErrorCode(HRESULT hr) noexcept
 {
@@ -277,18 +282,48 @@ std::string Window::Exception::TranslateErrorCode(HRESULT hr) noexcept
 	}
 
 	std::string errorString = pMsgBuf;
-	
+
 	LocalFree(pMsgBuf);
-	
+
 	return errorString;
 }
 
-HRESULT Window::Exception::GetErrorCode() const noexcept
+Window::HrException::HrException(int line, const char* file, HRESULT hr) noexcept
+	: Exception(line, file), hr(hr)
+{
+}
+
+const char* Window::HrException::what() const noexcept
+{
+	std::ostringstream oss;
+	oss << GetType() << std::endl
+		<< "[Error Code] 0x" << std::hex << std::uppercase << GetErrorCode()
+		<< std::dec << " (" << (unsigned long)GetErrorCode() << ")" << std::endl
+		<< "[Description] " << GetErrorDescription() << std::endl
+		<< GetOriginString();
+
+	whatBuffer = oss.str();
+	
+	return whatBuffer.c_str();
+}
+
+const char* Window::HrException::GetType() const noexcept
+{
+	return "D3D Tutorial Window Exception";
+}
+
+
+HRESULT Window::HrException::GetErrorCode() const noexcept
 {
 	return hr;
 }
 
-std::string Window::Exception::GetErrorString() const noexcept
+std::string Window::HrException::GetErrorDescription() const noexcept
 {
 	return TranslateErrorCode(hr);
+}
+
+const char* Window::NoGfxException::GetType() const noexcept
+{
+	return "D3D Tutorial Window Exception [No Graphics]";
 }

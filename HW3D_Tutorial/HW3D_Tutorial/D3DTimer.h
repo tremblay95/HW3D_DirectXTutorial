@@ -4,9 +4,9 @@
 class D3DTimer
 {
 public:
-	D3DTimer();
-	float Mark();
-	float Peak() const;
+	D3DTimer() noexcept;
+	float Mark() noexcept;
+	float Peek() const noexcept;
 
 private:
 	std::chrono::steady_clock::time_point last;

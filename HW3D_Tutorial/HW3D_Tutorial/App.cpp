@@ -23,10 +23,15 @@ int App::Go()
 
 void App::DoFrame()
 {
-	//Todo: fix weirdness when mouse exits client section...
-
-	const float t = timer.Peak();
+	//Todo: fix weirdness when mouse exits client section at the top?
+	/*const float t = timer.Peek();
 	std::wostringstream woss;
 	woss << "Time Elapsed: " << std::setprecision(1) << std::fixed << t << "s";
-	wnd.SetTitle(woss.str());
+	wnd.SetTitle(woss.str());*/
+
+	const float c = sin(timer.Peek()) / 2.0f + 0.5f;
+
+	wnd.Gfx().ClearBuffer(c, c, 1.0f);
+	wnd.Gfx().DrawTestTriangle();
+	wnd.Gfx().EndFrame();
 }

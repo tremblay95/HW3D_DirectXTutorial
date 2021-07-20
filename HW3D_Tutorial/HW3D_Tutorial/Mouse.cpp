@@ -122,12 +122,12 @@ void Mouse::OnWheelDelta(int x, int y, int delta) noexcept
 	wheelDeltaCarry += delta;
 	
 	// Generate events for every 120
-	while (wheelDeltaCarry > WHEEL_DELTA)
+	while (wheelDeltaCarry >= WHEEL_DELTA)
 	{
 		wheelDeltaCarry -= WHEEL_DELTA;
 		OnWheelUp(x, y);
 	}
-	while (wheelDeltaCarry < -WHEEL_DELTA)
+	while (wheelDeltaCarry <= -WHEEL_DELTA)
 	{
 		wheelDeltaCarry += WHEEL_DELTA;
 		OnWheelDown(x, y);
